@@ -167,7 +167,11 @@ console.log(photoUrl)
                 )
               }
             </div>
-            <input type="file" accept="image/*"  onChange={handlePhoto} style={{ display: 'none' }} />
+           <input
+  type="file"
+  accept="image/*"
+  onChange={handlePhoto}
+/>
           </label>
         </div>
 
