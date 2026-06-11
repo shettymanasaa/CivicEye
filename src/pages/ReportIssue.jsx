@@ -172,6 +172,12 @@ console.log(photoUrl)
   accept="image/*"
   onChange={handlePhoto}
 />
+<input
+  type="file"
+  accept="image/*"
+  capture="environment"
+  onChange={handlePhoto}
+/>
           </label>
         </div>
 
