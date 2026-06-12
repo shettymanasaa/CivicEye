@@ -161,6 +161,14 @@ export default function AuthorityHome() {
                   </button>
                   
                 )}
+                {c.status === "in_progress" && (
+  <button
+    onClick={() => markStatus(c.id, "resolved")}
+    disabled={isUpdating}
+  >
+    ✅ Mark Resolved
+  </button>
+)}
                
                
                 {c.status === 'reported' && (
