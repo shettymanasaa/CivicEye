@@ -167,11 +167,7 @@ console.log(photoUrl)
                 )
               }
             </div>
-           <input
-  type="file"
-  accept="image/*"
-  onChange={handlePhoto}
-/>
+          
 <input
   type="file"
   accept="image/*"
