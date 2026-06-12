@@ -89,14 +89,14 @@ export default function AuthorityHome() {
             <div className="stat-label">Open complaints</div>
           </div>
           <div className="stat-card">
-            <div className="stat-num" style={{ color: '#dc2626' }}>{escalated.length}</div>
+            <div className="stat-num" style={{ color: '#fa0505f0' }}>{escalated.length}</div>
             <div className="stat-label">Escalated</div>
           </div>
         </div>
 
         {escalated.length > 0 && (
           <div className="escalation-banner">
-            ⚠️ {escalated.length} complaint(s) overdue — immediate action needed
+            ⚠️ {escalated.length} 🚨 Resolution Deadline Exceeded – Escalation Triggered (⚠️ Immediate Administrative Attention Required)
           </div>
         )}
 
@@ -127,7 +127,7 @@ export default function AuthorityHome() {
                     {(c.issueType || []).map(t => (
                       <span key={t} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#f3f4f6', color: '#374151', fontWeight: 500, textTransform: 'capitalize' }}>{t}</span>
                     ))}
-                    {c.escalated && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#fee2e2', color: '#991b1b', fontWeight: 500 }}>⚠ Overdue</span>}
+                    {c.escalated && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#fee2e2', color: '#e20707', fontWeight: 500 }}>⚠ escalated!! action required</span>}
                   </div>
                   <a
   href={`https://www.google.com/maps?q=${c.location?.lat},${c.location?.lng}`}
@@ -159,7 +159,15 @@ export default function AuthorityHome() {
                   <button onClick={() => markStatus(c.id, 'in_progress')} disabled={isUpdating} style={{ flex: 1, padding: '8px', borderRadius: 8, border: '1px solid #bfdbfe', background: '#dbeafe', color: '#1e40af', fontSize: 12, fontWeight: 500, cursor: 'pointer' }}>
                     {isUpdating ? '...' : '▶ Mark In Progress'}
                   </button>
+                  
                 )}
+                {complaint.status === "In Progress" && (
+  <button
+    onClick={() => updateStatus(complaint.id, "Resolved")}
+  >
+    Mark Resolved
+  </button>
+)}
                
                 {c.status === 'reported' && (
                   <button onClick={() => markStatus(c.id, 'resolved')} disabled={isUpdating} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #bbf7d0', background: '#dcfce7', color: '#166534', fontSize: 12, cursor: 'pointer' }}>
