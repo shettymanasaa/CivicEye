@@ -161,13 +161,7 @@ export default function AuthorityHome() {
                   </button>
                   
                 )}
-                {complaint.status === "In Progress" && (
-  <button
-    onClick={() => updateStatus(complaint.id, "Resolved")}
-  >
-    Mark Resolved
-  </button>
-)}
+               
                
                 {c.status === 'reported' && (
                   <button onClick={() => markStatus(c.id, 'resolved')} disabled={isUpdating} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #bbf7d0', background: '#dcfce7', color: '#166534', fontSize: 12, cursor: 'pointer' }}>
