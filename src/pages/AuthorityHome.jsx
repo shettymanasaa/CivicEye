@@ -8,6 +8,7 @@ export default function AuthorityHome() {
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
+  const[proofPhoto,setProofPhoto]=usestate(null)
   const navigate = useNavigate()
 
   async function checkEscalations(allComplaints) {
@@ -51,12 +52,46 @@ export default function AuthorityHome() {
     setUpdating(id)
     const updates = { status: newStatus }
     if (newStatus === 'in_progress') updates.assignedAt = Timestamp.now()
-    if (newStatus === 'resolved') updates.resolvedAt = Timestamp.now()
+    if (newStatus === 'awaiting_verification') updates.resolvedAt = Timestamp.now()
     try {
       await updateDoc(doc(db, 'complaints', id), updates)
     } catch (e) { console.log(e) }
     setUpdating(null)
   }
+  async function uploadResolutionProof(id) {
+  if (!proofPhoto) {
+    alert('Please select a proof photo first')
+    return
+  }
+
+  try {
+    const formData = new FormData()
+
+    formData.append('file', proofPhoto)
+    formData.append('upload_preset', 'CIVICEYE')
+
+    const res = await fetch(
+      'https://api.cloudinary.com/v1_1/dged4n0du/image/upload',
+      {
+        method: 'POST',
+        body: formData
+      }
+    )
+
+    const data = await res.json()
+
+    await updateDoc(doc(db, 'complaints', id), {
+      resolutionPhoto: data.secure_url,
+      status: 'awaiting_verification',
+      resolvedAt: Timestamp.now()
+    })
+
+    setProofPhoto(null)
+
+  } catch (e) {
+    console.log(e)
+  }
+}
 
   const timeAgo = (ts) => {
     if (!ts) return ''
@@ -162,12 +197,21 @@ export default function AuthorityHome() {
                   
                 )}
                 {c.status === "in_progress" && (
+                  <>
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setProofPhoto(e.target.files[0])}
+  />
+
   <button
-    onClick={() => markStatus(c.id, "resolved")}
+    onClick={() => uploadResolutionProof(c.id)}
     disabled={isUpdating}
   >
-    ✅ Mark Resolved
+    Upload Proof & Send For Verification
   </button>
+</>
+  
 )}
                
                

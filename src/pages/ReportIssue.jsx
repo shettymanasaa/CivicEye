@@ -127,7 +127,12 @@ console.log(photoUrl)
         escalated: false,
         createdAt: Timestamp.now(),
         assignedAt: null,
-        resolvedAt: null
+        resolvedAt: null,
+        resolutionPhoto:"",
+        citizenVerified:false,
+        verified:null,
+        verificationstatus:'pending'
+
       })
       navigate('/citizen')
     } catch (err) {
