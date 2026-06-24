@@ -162,7 +162,7 @@ console.log(photoUrl)
               overflow: 'hidden'
             }}>
               {preview
-                ? <img src={preview} onclick={() => window.open(c.photoUrl, '_blank')} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 10 }} />
+                ? <img src={preview} onClick={() => window.open(c.photoUrl, '_blank')} style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 10 }} />
                 : (
                   <div>
                     <div style={{ fontSize: 32, marginBottom: 8 }}>📷</div>

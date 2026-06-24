@@ -1,3 +1,5 @@
+import { doc, updateDoc, Timestamp } from 'firebase/firestore'
+import { db } from '../firebase'
 import StageTracker from './StageTracker'
 
 export default function ComplaintCard({ complaint }) {
@@ -18,6 +20,17 @@ export default function ComplaintCard({ complaint }) {
     if (diff < 1440) return `${Math.floor(diff / 60)}h ago`
     return `${Math.floor(diff / 1440)}d ago`
   }
+  async function verifyComplaint(isApproved) {
+  try {
+    await updateDoc(doc(db, 'complaints', complaint.id), {
+      status: isApproved ? 'resolved' : 'reopened',
+      citizenVerified: isApproved,
+      verifiedAt: Timestamp.now()
+    })
+  } catch (err) {
+    console.log(err)
+  }
+}
 
   return (
     <div style={{
@@ -69,6 +82,58 @@ export default function ComplaintCard({ complaint }) {
 
       {/* Stage tracker */}
       <StageTracker status={status} />
+      {status === 'awaiting_verification' && (
+  <div style={{ marginTop: 12 }}>
+    
+    {complaint.proofPhotoUrl && (
+      <img
+        src={complaint.proofPhotoUrl}
+        alt="proof"
+        style={{
+          width: '100%',
+          maxHeight: 220,
+          objectFit: 'cover',
+          borderRadius: 8,
+          marginBottom: 10
+        }}
+      />
+    )}
+
+    <div style={{
+      display: 'flex',
+      gap: 10
+    }}>
+      <button
+        onClick={() => verifyComplaint(true)}
+        style={{
+          flex: 1,
+          padding: '10px',
+          background: '#dcfce7',
+          border: '1px solid #16a34a',
+          borderRadius: 8,
+          cursor: 'pointer'
+        }}
+      >
+        ✅ Fixed
+      </button>
+
+      <button
+        onClick={() => verifyComplaint(false)}
+        style={{
+          flex: 1,
+          padding: '10px',
+          background: '#fee2e2',
+          border: '1px solid #dc2626',
+          borderRadius: 8,
+          cursor: 'pointer'
+        }}
+      >
+        ❌ Not Fixed
+      </button>
+    </div>
+
+  </div>
+)}
     </div>
   )
 }

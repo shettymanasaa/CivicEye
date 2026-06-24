@@ -8,7 +8,7 @@ export default function AuthorityHome() {
   const [complaints, setComplaints] = useState([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
-  const[proofPhoto,setProofPhoto]=usestate(null)
+  const[proofPhoto,setProofPhoto]=useState(null)
   const navigate = useNavigate()
 
   async function checkEscalations(allComplaints) {
@@ -29,7 +29,7 @@ export default function AuthorityHome() {
   useEffect(() => {
     const q = query(
       collection(db, 'complaints'),
-      where('status', 'in', ['reported', 'assigned', 'in_progress']),
+      where('status', 'in', ['reported', 'assigned', 'in_progress','awaiting_verification']),
      
     )
     const unsub = onSnapshot(q, snap => {
@@ -186,7 +186,7 @@ export default function AuthorityHome() {
               )}
 
               {c.photoUrl && (
-                <img src={c.photoUrl} onclick={() => window.open(c.photoUrl,'_blank')} style={{ width: '100%', maxHeight: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 10 }} />
+                <img src={c.photoUrl} onClick={() => window.open(c.photoUrl,'_blank')} style={{ width: '100%', maxHeight: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 10 }} />
               )}
 
               <div style={{ display: 'flex', gap: 8 }}>
@@ -208,18 +208,13 @@ export default function AuthorityHome() {
     onClick={() => uploadResolutionProof(c.id)}
     disabled={isUpdating}
   >
-    Upload Proof & Send For Verification
+    Upload Proof Photo
   </button>
 </>
   
 )}
                
                
-                {c.status === 'reported' && (
-                  <button onClick={() => markStatus(c.id, 'resolved')} disabled={isUpdating} style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #bbf7d0', background: '#dcfce7', color: '#166534', fontSize: 12, cursor: 'pointer' }}>
-                    {isUpdating ? '...' : '✅'}
-                  </button>
-                )}
               </div>
 
               <div style={{ marginTop: 8, fontSize: 11, color: '#888', display: 'flex', justifyContent: 'space-between' }}>
