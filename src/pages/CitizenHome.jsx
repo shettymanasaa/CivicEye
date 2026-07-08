@@ -13,20 +13,27 @@ export default function CitizenHome() {
   useEffect(() => {
     console.log("UID:", auth.currentUser?.uid)
     const q = query(
-      collection(db, 'complaints'),
-      where('citizenId', '==', auth.currentUser.uid),
-      orderBy('createdAt', 'desc')
-    )
+  collection(db, 'complaints'),
+  orderBy('createdAt', 'desc')
+)
     const unsub = onSnapshot(q, snap => {
   console.log("Docs found:", snap.docs.length)
   console.log("Data:", snap.docs.map(d => d.data()))
+  const uid = auth.currentUser.uid
 
-  setComplaints(
-    snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }))
+const myComplaints = snap.docs
+  .map(d => ({
+    id: d.id,
+    ...d.data()
+  }))
+  .filter(c =>
+    c.citizenId === uid ||
+    (c.supporters || []).includes(uid)
   )
+
+setComplaints(myComplaints)
+
+  
 
   setLoading(false)
 })
