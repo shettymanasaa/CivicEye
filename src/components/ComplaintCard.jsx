@@ -57,10 +57,7 @@ const [reason, setReason] = useState("")
       vote: isApproved ? "fixed" : "not_fixed"
     }
   ]
-  const requiredVotes = Math.min(
-  5,
-  Math.ceil(supporters.length * 0.4)
-)
+  
 
 const currentVotes =
   complaint.verificationVotes?.length || 0
