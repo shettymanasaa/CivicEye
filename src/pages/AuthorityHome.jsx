@@ -106,18 +106,19 @@ return b.createdAt?.seconds - a.createdAt?.seconds
 
     const data = await res.json()
 
-    setProofPhoto(null)
-
-  } catch (e) {
-    console.log(e)
-  }
-}
+    
 await updateDoc(doc(db, 'complaints', id), {
   resolutionPhoto: data.secure_url,
   status: 'awaiting_verification',
   resolvedAt: Timestamp.now(),
   verificationVotes: []
 })
+setProofPhoto(null)
+
+  } catch (e) {
+    console.log(e)
+  }
+}
 
   const timeAgo = (ts) => {
     if (!ts) return ''
