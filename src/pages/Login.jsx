@@ -1,3 +1,4 @@
+console.log("Button clicked");
 import { useState } from 'react'
 import { auth, db } from '../firebase'
 import {
@@ -18,19 +19,28 @@ export default function Login() {
   
   const navigate = useNavigate()
 
-  async function loginCitizen() {
-  setLoading(true)
-  setError("")
+ async function loginCitizen() {
+  console.log("Button clicked");
+
+  setLoading(true);
+  setError("");
 
   try {
-    await signInAnonymously(auth)
-    navigate("/citizen")
+    console.log("Signing in...");
+
+    const userCredential = await signInAnonymously(auth);
+
+    console.log("Success!", userCredential.user);
+
+    navigate("/citizen");
   } catch (err) {
-    setError(err.message)
+    console.error(err);
+    setError(err.message);
   }
 
-  setLoading(false)
+  setLoading(false);
 }
+  
   async function loginAuthority() {
     if (!email || !password) { setError('Enter email and password'); return }
     setError(''); setLoading(true)
@@ -77,13 +87,9 @@ export default function Login() {
       Continue anonymously. No phone number or account required.
     </div>
 
-    <button
-      onClick={loginCitizen}
-      disabled={loading}
-      className="btn btn-blue"
-    >
-      {loading ? "Opening..." : "Continue as Citizen"}
-    </button>
+    <button onClick={loginCitizen}>
+  Continue as Citizen
+</button>
   </div>
 )}
 
