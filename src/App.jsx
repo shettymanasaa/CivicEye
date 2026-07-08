@@ -14,17 +14,25 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [role, setRole] = useState(null)
   const [loading, setLoading] = useState(true)
+  const snap = await getDoc(doc(db, 'users', u.uid))
+if (snap.exists()) setRole(snap.data().role)
   
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (u) {
-        setUser(u)
-        try {
-          const snap = await getDoc(doc(db, 'users', u.uid))
-          if (snap.exists()) setRole(snap.data().role)
-        } catch (e) {
-          console.log(e)
-        }
+  setUser(u)
+
+  if (u.isAnonymous) {
+    setRole("citizen")
+  } else {
+    try {
+      const snap = await getDoc(doc(db, "users", u.uid))
+      if (snap.exists()) setRole(snap.data().role)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
       } else {
         setUser(null)
         setRole(null)
