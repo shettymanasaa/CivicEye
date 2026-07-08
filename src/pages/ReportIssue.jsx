@@ -1,13 +1,21 @@
 import React,{useState,useRef} from 'react'
 
 import { db,auth } from '../firebase'
-import { collection, addDoc, Timestamp } from 'firebase/firestore'
-
+import {
+  addDoc,
+  collection,
+  getDocs,
+  updateDoc,
+  increment,
+  arrayUnion,
+  doc,
+  Timestamp
+} from "firebase/firestore";
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import VoiceInput from '../components/VoiceInput'
 import { detectIssue } from '../utils/detectIssue'
-
+import { getDistance } from "../utils/distance";
 export default function ReportIssue() {
   
   const [photo, setPhoto] = useState(null)
@@ -86,37 +94,90 @@ const [detected, setDetected] = useState(null)
     if (!description && manualType.length === 0) { setError('Please describe the issue or select issue type'); return }
     setError('')
     if (detected?.noComplaint) {
-  setError('No civic issue detected in image')
-  return
-}
+      setError('No civic issue detected in image')
+      return
+    }
     setSubmitting(true)
     try {
       const formData = new FormData()
-formData.append('file', photo)
-formData.append('upload_preset', 'CIVICEYE')
+      formData.append('file', photo)
+      formData.append('upload_preset', 'CIVICEYE')
 
-const cloudinaryRes = await fetch(
-  'https://api.cloudinary.com/v1_1/dged4n0du/image/upload',
-  {
-    method: 'POST',
-    body: formData
-  }
-)
+      const cloudinaryRes = await fetch(
+        'https://api.cloudinary.com/v1_1/dged4n0du/image/upload',
+        {
+          method: 'POST',
+          body: formData
+        }
+      )
 
-const cloudinaryData = await cloudinaryRes.json()
-console.log(cloudinaryData)
-const photoUrl = cloudinaryData.secure_url
-console.log(photoUrl)
+      const cloudinaryData = await cloudinaryRes.json()
+      console.log(cloudinaryData)
+      const photoUrl = cloudinaryData.secure_url
+      console.log(photoUrl)
 
-      const issueTypes = manualType.length > 0 ? manualType : (detected?.issueTypes || ['garbage'])
+      const issueType = manualType.length > 0 ? manualType : (detected?.issueType|| ['garbage'])
+      console.log("issueType =", issueType);
+console.log("manualType =", manualType);
+console.log("detected =", detected);
       const severity = detected?.severity || 'medium'
       const priority = detected?.priority || 5
-      const dept = issueTypes.includes('garbage') && issueTypes.includes('pothole')
-        ? 'both' : issueTypes.includes('pothole') ? 'roads' : 'sanitation'
+      const dept = issueType.includes('garbage') && issueType.includes('pothole')
+        ? 'both' : issueType.includes('pothole') ? 'roads' : 'sanitation'
+
+      // ---------- Duplicate Complaint Check ----------
+      const snapshot = await getDocs(collection(db, "complaints"));
+      const duplicateComplaint = snapshot.docs.find((docSnap) => {
+        const data = docSnap.data();
+
+        if (data.status === "resolved") return false;
+
+       const existingIssueType = Array.isArray(data.issueType)
+  ? data.issueType
+  : [];
+
+const sameIssue =
+  existingIssueType.length === issueType.length &&
+  existingIssueType.every(type => issueType.includes(type));
+        if (!sameIssue) return false;
+if (!data.location?.lat || !data.location?.lng) return false;
+
+const distance = getDistance(
+  location.lat,
+  location.lng,
+  data.location.lat,
+  data.location.lng
+);
+
+return distance <= 200;
+      })
+
+      if (duplicateComplaint) {
+        await updateDoc(
+  doc(db, "complaints", duplicateComplaint.id),
+  {
+    supportCount: increment(1),
+    supporters: arrayUnion(auth.currentUser.uid)
+  }
+);
+
+alert(
+  "This issue has already been reported . You are a supporter."
+);
+
+navigate("/citizen");
+setSubmitting(false);
+return;
+        setError('This issue appears to be a duplicate of a reported complaint.');
+        setSubmitting(false)
+        return
+      }
 
       await addDoc(collection(db, 'complaints'), {
         citizenId: auth.currentUser.uid,
-        issueType: issueTypes,
+        supportCount: 1,
+supporters: [auth.currentUser.uid],
+        issueType: issueType,
         description,
         severity,
         priority,
@@ -128,12 +189,12 @@ console.log(photoUrl)
         createdAt: Timestamp.now(),
         assignedAt: null,
         resolvedAt: null,
-        resolutionPhoto:"",
-        citizenVerified:false,
-        verified:null,
-        verificationstatus:'pending'
-
+        resolutionPhoto: "",
+        citizenVerified: false,
+        verified: null,
+        verificationstatus: 'pending'
       })
+
       navigate('/citizen')
     } catch (err) {
       setError('Failed to submit. Check your internet connection and try again.')

@@ -29,19 +29,45 @@ export default function AuthorityHome() {
   useEffect(() => {
     const q = query(
       collection(db, 'complaints'),
-      where('status', 'in', ['reported', 'assigned', 'in_progress','awaiting_verification']),
-     
+      where('status', 'in', [
+  'reported',
+  'reopened',
+  'assigned',
+  'in_progress',
+  'awaiting_verification',
+  'inspection_required'
+]),
     )
     const unsub = onSnapshot(q, snap => {
       console.log("Authority docs:", snap.docs.length)
   console.log(snap.docs.map(d => d.data()))
       const all = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       checkEscalations(all)
-      const sorted = all.sort((a,b)=>{
-        if(a.escalated&& !b.escalated) return-1
-        if(a.escalated&& b.escalated) return 1
-        return b.priority-a.priority
-      })
+      
+
+const order = {
+  reopened: 0,
+  reported: 1,
+  in_progress: 2,
+  awaiting_verification: 3,
+  resolved: 4
+}
+
+const sorted = all.sort((a,b) => {
+
+  if (a.escalated && !b.escalated) return -1
+  if (!a.escalated && b.escalated) return 1
+
+  if (order[a.status] !== order[b.status]) {
+    return order[a.status] - order[b.status]
+  }
+
+  if (b.priority !== a.priority) {
+  return b.priority - a.priority
+}
+
+return b.createdAt?.seconds - a.createdAt?.seconds
+})
       setComplaints(sorted)
       setLoading(false)
     })
@@ -80,18 +106,18 @@ export default function AuthorityHome() {
 
     const data = await res.json()
 
-    await updateDoc(doc(db, 'complaints', id), {
-      resolutionPhoto: data.secure_url,
-      status: 'awaiting_verification',
-      resolvedAt: Timestamp.now()
-    })
-
     setProofPhoto(null)
 
   } catch (e) {
     console.log(e)
   }
 }
+await updateDoc(doc(db, 'complaints', id), {
+  resolutionPhoto: data.secure_url,
+  status: 'awaiting_verification',
+  resolvedAt: Timestamp.now(),
+  verificationVotes: []
+})
 
   const timeAgo = (ts) => {
     if (!ts) return ''
@@ -164,6 +190,16 @@ export default function AuthorityHome() {
                     ))}
                     {c.escalated && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: '#fee2e2', color: '#e20707', fontWeight: 500 }}>⚠ escalated!! action required</span>}
                   </div>
+                  <div style={{
+  marginBottom: 8,
+  fontWeight: 600
+}}>
+  {c.status === 'reported' && 'New Complaint'}
+  {c.status === 'reopened' && ' ❌Reopened'}
+  {c.status === 'in_progress' && '🔵 In Progress'}
+  {c.status === 'awaiting_verification' && '🟣 Awaiting Verification'}
+  {c.status === 'resolved' && '🟢 Resolved'}
+</div>
                   <a
   href={`https://www.google.com/maps?q=${c.location?.lat},${c.location?.lng}`}
   target="_blank"
@@ -182,12 +218,97 @@ export default function AuthorityHome() {
               </div>
 
               {c.description && (
-                <p style={{ fontSize: 13, color: '#555', marginBottom: 10, lineHeight: 1.5 }}>{c.description}</p>
+                <div
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    background: "#eff6ff",
+    color: "#1d4ed8",
+    padding: "6px 10px",
+    borderRadius: 20,
+    fontSize: 12,
+    fontWeight: 600,
+    marginBottom: 10
+  }}
+>
+  👥 {c.supportCount || 1} Citizens Reported
+</div>
+                
               )}
+              {c.reopenReason && (
+  <div
+    style={{
+      background: "#fff7ed",
+      border: "1px solid #f5f3f0",
+      borderRadius: 8,
+      padding: 10,
+      marginBottom: 10,
+      color: "#9a3412"
+    }}
+  >
+    <strong>Citizen Feedback</strong>
 
-              {c.photoUrl && (
-                <img src={c.photoUrl} onClick={() => window.open(c.photoUrl,'_blank')} style={{ width: '100%', maxHeight: 120, objectFit: 'cover', borderRadius: 8, marginBottom: 10 }} />
-              )}
+    <div style={{ marginTop: 6 }}>
+      {c.reopenReason}
+    </div>
+  </div>
+)}
+
+              <div style={{
+  display:'flex',
+  gap:10,
+  marginBottom:10
+}}>
+
+  {c.photoUrl && (
+    <div style={{flex:1}}>
+      <div style={{
+        fontSize:12,
+        fontWeight:600,
+        marginBottom:4
+      }}>
+        Before
+      </div>
+
+      <img
+        src={c.photoUrl}
+        onClick={() => window.open(c.photoUrl,'_blank')}
+        style={{
+          width:'100%',
+          height:180,
+          objectFit:'cover',
+          borderRadius:8
+        }}
+      />
+    </div>
+  )}
+
+  {c.proofPhotoUrl && (
+    <div style={{flex:1}}>
+      <div style={{
+        fontSize:12,
+        fontWeight:600,
+        marginBottom:4,
+        color:'green'
+      }}>
+        After
+      </div>
+
+      <img
+        src={c.proofPhotoUrl}
+        onClick={() => window.open(c.proofPhotoUrl,'_blank')}
+        style={{
+          width:'100%',
+          height:180,
+          objectFit:'cover',
+          borderRadius:8
+        }}
+      />
+    </div>
+  )}
+
+</div>
 
               <div style={{ display: 'flex', gap: 8 }}>
                 {c.status === 'reported' && (
@@ -196,8 +317,18 @@ export default function AuthorityHome() {
                   </button>
                   
                 )}
-                {c.status === "in_progress" && (
+               
+               {(c.status === "in_progress" || c.status === "reopened") && (
+                
                   <>
+                  <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    marginTop: 10,
+  }}
+></div>
   <input
     type="file"
     accept="image/*"
@@ -207,13 +338,19 @@ export default function AuthorityHome() {
   <button
     onClick={() => uploadResolutionProof(c.id)}
     disabled={isUpdating}
+     style={{
+      padding: "8px 16px",
+      borderRadius: 8,
+      cursor: "pointer",
+      whiteSpace: "nowrap",
+    }}
   >
     Upload Proof Photo
   </button>
 </>
   
 )}
-               
+ 
                
               </div>
 

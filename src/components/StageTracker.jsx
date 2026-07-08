@@ -3,7 +3,8 @@ const LABELS = {
   reported: 'Reported',
   assigned: 'Assigned',
   in_progress: 'In Progress',
-  resolved: 'Resolved'
+  inspection_required: "Inspection Required",
+  
 }
 
 export default function StageTracker({ status }) {

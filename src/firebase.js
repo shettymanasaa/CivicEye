@@ -7,6 +7,8 @@ import { initializeApp } from 'firebase/app'
 import { getFirestore } from 'firebase/firestore'
 import { getAuth } from 'firebase/auth'
 import { getStorage } from 'firebase/storage'
+import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
+
 
 const firebaseConfig = {
    apiKey: "AIzaSyAYt3bxUApPRSZKBERtayob2zWsJXoLuOo",
@@ -24,3 +26,13 @@ const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
 export const auth = getAuth(app)
 export const storage = getStorage(app)
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    try {
+      await signInAnonymously(auth);
+      console.log("Anonymous login successful");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+});
