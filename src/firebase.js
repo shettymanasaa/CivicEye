@@ -21,18 +21,9 @@ const firebaseConfig = {
 };
 
 
-const app = initializeApp(firebaseConfig)
+const app = initializeApp(firebaseConfig)``
 
 export const db = getFirestore(app)
 export const auth = getAuth(app)
 export const storage = getStorage(app)
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    try {
-      await signInAnonymously(auth);
-      console.log("Anonymous login successful");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-});
+

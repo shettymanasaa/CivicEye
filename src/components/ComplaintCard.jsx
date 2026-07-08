@@ -59,8 +59,7 @@ const [reason, setReason] = useState("")
   ]
   
 
-const currentVotes =
-  complaint.verificationVotes?.length || 0
+
 
   const supporters = complaint.supporters || []
   const requiredVotes = Math.min(
@@ -323,7 +322,7 @@ const hasVoted =
 >
   Community Verification
   <br />
-  {currentVotes} / {requiredVotes} votes received
+  {updatedVotes} / {requiredVotes} votes received
 </div>
     <div style={{
       display: 'flex',
