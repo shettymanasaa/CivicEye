@@ -39,8 +39,10 @@ export default function Login() {
       const snap = await getDoc(doc(db, 'users', result.user.uid))
       if (snap.exists() && snap.data().role === 'authority') { navigate('/authority') }
       else { setError('Not an authority account.'); await auth.signOut() }
-    } catch (err) { setError('Login failed. Check credentials.') }
-    setLoading(false)
+    } catch (err) {
+  console.log(err)
+  setError(err.message)
+}
   }
 
   return (
