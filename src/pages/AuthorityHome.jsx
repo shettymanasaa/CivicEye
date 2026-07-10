@@ -59,7 +59,7 @@ const sorted = all.sort((a,b) => {
   if (!a.escalated && b.escalated) return 1
 
   if (order[a.status] !== order[b.status]) {
-    return order[a.status] - order[b.status]
+    return order[a.] - order[b.status]
   }
 
   if (b.priority !== a.priority) {
@@ -199,7 +199,7 @@ setProofPhoto(null)
   {c.status === 'reopened' && ' ❌Reopened'}
   {c.status === 'in_progress' && '🔵 In Progress'}
   {c.status === 'awaiting_verification' && '🟣 Awaiting Verification'}
-  {c.status === 'resolved' && '🟢 Resolved'}
+  {c. === 'resolved' && '🟢 Resolved'}
 </div>
                   <a
   href={`https://www.google.com/maps?q=${c.location?.lat},${c.location?.lng}`}

@@ -12,29 +12,31 @@ export default function CitizenHome() {
 
   useEffect(() => {
     console.log("UID:", auth.currentUser?.uid)
+    
     const q = query(
   collection(db, 'complaints'),
   orderBy('createdAt', 'desc')
 )
-    const unsub = onSnapshot(q, snap => {
+   const unsub = onSnapshot(q, snap => {
+
+  const uid = auth.currentUser?.uid
+  console.log("Logged in UID:", uid)
+
   console.log("Docs found:", snap.docs.length)
-  console.log("Data:", snap.docs.map(d => d.data()))
-  const uid = auth.currentUser.uid
 
-const myComplaints = snap.docs
-  .map(d => ({
-    id: d.id,
-    ...d.data()
-  }))
-  .filter(c =>
-    c.citizenId === uid ||
-    (c.supporters || []).includes(uid)
-  )
+  const myComplaints = snap.docs
+    .map(d => ({
+      id: d.id,
+      ...d.data()
+    }))
+    .filter(c =>
+      c.citizenId === uid ||
+      (c.supporters || []).includes(uid)
+    )
 
-setComplaints(myComplaints)
+  console.log("My Complaints:", myComplaints)
 
-  
-
+  setComplaints(myComplaints)
   setLoading(false)
 })
     return unsub
@@ -48,7 +50,7 @@ setComplaints(myComplaints)
       <Navbar title="CivicEye" role="citizen" />
       <div className="page">
         <div style={{ marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>My Complaints</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>my activity</h2>
           <p style={{ fontSize: 13, color: '#888' }}>Track all your reported issues here</p>
         </div>
 

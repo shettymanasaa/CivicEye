@@ -20,21 +20,30 @@ export default function Login() {
   const navigate = useNavigate()
 
  async function loginCitizen() {
-  console.log("Button clicked");
+  if (!email || !password) {
+    setError("Enter email and password");
+    return;
+  }
 
   setLoading(true);
   setError("");
 
   try {
-    console.log("Signing in...");
+    const result = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-    const userCredential = await signInAnonymously(auth);
+    const snap = await getDoc(doc(db, "users", result.user.uid));
 
-    console.log("Success!", userCredential.user);
-
-    navigate("/citizen");
+    if (snap.exists() && snap.data().role === "citizen") {
+      navigate("/citizen");
+    } else {
+      setError("Not a citizen account.");
+      await auth.signOut();
+    }
   } catch (err) {
-    console.error(err);
     setError(err.message);
   }
 
@@ -72,8 +81,9 @@ export default function Login() {
           </button>
         </div>
 
-        {mode === 'citizen' && (
+        {mode === "citizen" && (
   <div>
+
     <div
       style={{
         background: "#dcfce7",
@@ -84,12 +94,79 @@ export default function Login() {
         marginBottom: 20,
       }}
     >
-      Continue anonymously. No phone number or account required.
+      Login to report and track your complaints.
     </div>
 
-    <button onClick={loginCitizen}>
-  Continue as Citizen
-</button>
+    <label
+      style={{
+        fontSize: 13,
+        color: "#555",
+        fontWeight: 500,
+        display: "block",
+        marginBottom: 6,
+      }}
+    >
+      Email
+    </label>
+
+    <input
+      className="input"
+      type="email"
+      placeholder="Enter your email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      style={{ marginBottom: 12 }}
+    />
+
+    <label
+      style={{
+        fontSize: 13,
+        color: "#555",
+        fontWeight: 500,
+        display: "block",
+        marginBottom: 6,
+      }}
+    >
+      Password
+    </label>
+
+    <input
+      className="input"
+      type="password"
+      placeholder="Enter password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      style={{ marginBottom: 16 }}
+    />
+
+    <button
+      onClick={loginCitizen}
+      disabled={loading}
+      className="btn btn-blue"
+    >
+      {loading ? "Logging in..." : "Login as Citizen"}
+    </button>
+
+    <p
+      style={{
+        marginTop: 18,
+        textAlign: "center",
+        fontSize: 14,
+      }}
+    >
+      Don't have an account?{" "}
+      <span
+        onClick={() => navigate("/signup")}
+        style={{
+          color: "#2563eb",
+          cursor: "pointer",
+          fontWeight: 600,
+        }}
+      >
+        Create Account
+      </span>
+    </p>
+
   </div>
 )}
 

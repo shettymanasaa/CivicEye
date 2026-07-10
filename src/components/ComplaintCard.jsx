@@ -247,26 +247,79 @@ const hasVoted =
 
       {/* Stage tracker */}
       <StageTracker status={status} />
-      
-      
-      {status === 'awaiting_verification' && isSupporter && !hasVoted && (
+      {/* Supporter can vote */}
+{status === "awaiting_verification" && isSupporter && !hasVoted && (
   <div style={{ marginTop: 12 }}>
+
     <textarea
-  placeholder="Reason for not fixing..."
-  value={reason}
-  onChange={(e)=>setReason(e.target.value)}
-  rows={3}
-  style={{
-    width:"100%",
-    padding:10,
-    borderRadius:8,
-    border:"1px solid #ddd",
-    marginBottom:12,
-    resize:"vertical"
-  }}
-  
-/>
-{status === "awaiting_verification" && hasVoted && (
+      placeholder="Reason for not fixing..."
+      value={reason}
+      onChange={(e) => setReason(e.target.value)}
+      rows={3}
+      style={{
+        width: "100%",
+        padding: 10,
+        borderRadius: 8,
+        border: "1px solid #ddd",
+        marginBottom: 12,
+        resize: "vertical"
+      }}
+    />
+
+    {complaint.resolutionPhoto && (
+      <img
+        src={complaint.resolutionPhoto}
+        alt="resolution"
+        style={{
+          width: "100%",
+          maxHeight: 220,
+          objectFit: "cover",
+          borderRadius: 8,
+          marginBottom: 10
+        }}
+      />
+    )}
+
+    <div
+      style={{
+        display: "flex",
+        gap: 10
+      }}
+    >
+      <button
+        onClick={() => verifyComplaint(true)}
+        style={{
+          flex: 1,
+          padding: "10px",
+          background: "#dcfce7",
+          border: "1px solid #16a34a",
+          borderRadius: 8,
+          cursor: "pointer"
+        }}
+      >
+        ✅ Fixed
+      </button>
+
+      <button
+        onClick={() => verifyComplaint(false)}
+        style={{
+          flex: 1,
+          padding: "10px",
+          background: "#fee2e2",
+          border: "1px solid #dc2626",
+          borderRadius: 8,
+          cursor: "pointer"
+        }}
+      >
+        ❌ Not Fixed
+      </button>
+    </div>
+
+  </div>
+)}
+
+{/* Already voted */}
+{status === "awaiting_verification" && isSupporter && hasVoted && (
   <div
     style={{
       marginTop: 12,
@@ -278,10 +331,11 @@ const hasVoted =
       fontWeight: 500
     }}
   >
-    ✅ Thank you! 
+    ✅ Thank you! Your verification has been recorded.
   </div>
 )}
 
+{/* Not a supporter */}
 {status === "awaiting_verification" && !isSupporter && (
   <div
     style={{
@@ -296,69 +350,9 @@ const hasVoted =
     Waiting for community verification...
   </div>
 )}
+      
+      
     
-    {complaint.resolutionPhoto && (
-      <img
-        src={complaint.resolutionPhoto}
-        alt="resolution"
-        style={{
-          width: '100%',
-          maxHeight: 220,
-          objectFit: 'cover',
-          borderRadius: 8,
-          marginBottom: 10
-        }}
-      />
-    )}
-<div
-  style={{
-    background: "#eff6ff",
-    padding: "10px",
-    borderRadius: "8px",
-    marginBottom: "12px",
-    fontSize: "14px",
-    color: "#1d4ed8"
-  }}
->
-  Community Verification
-  <br />
-  {updatedVotes} / {requiredVotes} votes received
-</div>
-    <div style={{
-      display: 'flex',
-      gap: 10
-    }}>
-      <button
-        onClick={() => verifyComplaint(true)}
-        style={{
-          flex: 1,
-          padding: '10px',
-          background: '#dcfce7',
-          border: '1px solid #16a34a',
-          borderRadius: 8,
-          cursor: 'pointer'
-        }}
-      >
-        ✅ Fixed
-      </button>
-
-      <button
-        onClick={() => verifyComplaint(false)}
-        style={{
-          flex: 1,
-          padding: '10px',
-          background: '#fee2e2',
-          border: '1px solid #dc2626',
-          borderRadius: 8,
-          cursor: 'pointer'
-        }}
-      >
-        ❌ Not Fixed
-      </button>
-    </div>
-
-  </div>
-)}
-    </div>
-  )
-}
+  
+</
+div> )}
