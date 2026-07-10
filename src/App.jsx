@@ -5,7 +5,7 @@ import { auth, db } from './firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 import { doc, getDoc } from 'firebase/firestore'
 
-import Signup from "./pages/Signup";
+import Signup from "./pages/Signup"
 import Login from './pages/Login'
 import CitizenHome from './pages/CitizenHome'
 import ReportIssue from './pages/ReportIssue'
